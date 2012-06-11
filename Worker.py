@@ -44,12 +44,15 @@ class Worker(multiprocessing.Process):
             while(self.should_continue):
                 ready = self.incoming_messages_read.poll(timeout)
                 if not ready:
-                    timeout = min(timeout*2, 5)
+                    # Exponential backoff; don't need to keep polling
+                    timeout = min(timeout*2, 2)
                     continue
                 
+                # Work coming in again; speed up polling.
                 timeout = self.default_timeout
                 incoming = self.incoming_messages_read.recv()
-                self.log('<- {incoming}'.format(**locals()))
+
+                self.log('<- {incoming}'.format(incoming=incoming))
                 command, args, ticket_id = incoming
                 self.dispatch(command, args, ticket_id, self.outgoing_messages_write)
                 

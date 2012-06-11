@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 import multiprocessing
+from time import time
 
 from TaskMaster import TaskMaster
 from Worker import Worker
@@ -15,13 +16,11 @@ def log(msg):
     print('{pid} : {msg}'.format(pid='root', msg=msg))
 
 def process(msg):
-    log(msg)
+    r_value, task_id = msg
+    log('{task_id} received at {time}'.format(task_id=task_id, time=time()))
 
 def event_loop(incoming_channels):
-    should_continue = True
-    i = 0
     while(True):
-        i += 1
         num_processes = len(incoming_channels)
         if num_processes == 0:
             break
@@ -42,6 +41,7 @@ if __name__ == '__main__':
     import random
     random.seed()
 
+    # Probably only 4 cores available
     num_workers = 4
     workers = []
     incoming_data_channels = [] 
